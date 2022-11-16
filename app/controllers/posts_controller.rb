@@ -9,7 +9,7 @@ class PostsController < ApplicationController
   # GET /posts/1 or /posts/1.json
   def show
     @post.update(views: @post.views+1)
-    @comments = @post.comments.order(created_at: :desc)
+    @comments = @post.comments.includes(:user, :rich_text_body).order(created_at: :desc)
     mark_notifications_as_read
   end
 
@@ -69,6 +69,7 @@ class PostsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def post_params
       params.require(:post).permit(:title, :body)
+      redirect_to @post, status: :moved_permanently if params[:id] != @post.slug
     end
 
     def mark_notifications_as_read
